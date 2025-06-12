@@ -121,10 +121,10 @@ For any queries or support, please open an issue in the repository.
 
 The following diagram illustrates the user flow of the application:
 
-![User Flow](user-flow.png)
+![User Flow](userflow.png)
 
 ## Database Schema
 
 The following diagram shows the database structure used in the project:
 
-![Database Schema](database-schema.png)
+![Database Schema](database.png)
