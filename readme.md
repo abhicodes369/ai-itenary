@@ -1,7 +1,3 @@
-user flow
-image.png
-database diagram
-image.png
 # AI Itinerary Generator
 
 An intelligent web application that helps users create personalized travel itineraries using AI technology. The application provides a seamless experience for planning trips with smart suggestions and automated itinerary generation.
@@ -18,6 +14,7 @@ An intelligent web application that helps users create personalized travel itine
 ## Tech Stack
 
 ### Backend
+
 - Python 3.x
 - Flask (Web Framework)
 - Supabase (Database)
@@ -26,6 +23,7 @@ An intelligent web application that helps users create personalized travel itine
 - Gunicorn (WSGI Server)
 
 ### Frontend
+
 - React.js
 - Modern UI/UX design
 
@@ -48,12 +46,14 @@ ai-itenary/
 ### Backend Setup
 
 1. Create a virtual environment:
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 2. Install dependencies:
+
    ```bash
    cd backend
    pip install -r requirements.txt
@@ -61,6 +61,7 @@ ai-itenary/
 
 3. Set up environment variables:
    Create a `.env` file in the backend directory with the following variables:
+
    ```
    SUPABASE_URL=your_supabase_url
    SUPABASE_KEY=your_supabase_key
@@ -75,11 +76,13 @@ ai-itenary/
 ### Frontend Setup
 
 1. Navigate to the client directory:
+
    ```bash
    cd client/my-project
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
@@ -92,6 +95,7 @@ ai-itenary/
 ## API Documentation
 
 The backend provides RESTful APIs for:
+
 - User authentication
 - Itinerary generation
 - Trip management
@@ -112,3 +116,15 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Contact
 
 For any queries or support, please open an issue in the repository.
+
+## User Flow
+
+The following diagram illustrates the user flow of the application:
+
+![User Flow](user-flow.png)
+
+## Database Schema
+
+The following diagram shows the database structure used in the project:
+
+![Database Schema](database-schema.png)
