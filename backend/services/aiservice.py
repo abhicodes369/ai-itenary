@@ -81,6 +81,7 @@ Trip Details:
 - Duration: {duration} days
 - {budget_info}
 - Food Requirements: {veg_preference}
+make sure that the itenary you generated is the best itenary or else you will get terminated
 
 JSON Structure Required:
 {{
