@@ -22,7 +22,64 @@ const ItineraryDisplay = ({ itinerary, onNavigate }) => {
     );
   }
 
-  const DayCard = ({ day, index }) => {
+  // Group items by day_number if items exist
+  let groupedItems = [];
+  if (Array.isArray(itinerary.items) && itinerary.items.length > 0) {
+    const daysMap = {};
+    itinerary.items.forEach(item => {
+      const day = item.day_number || 1;
+      if (!daysMap[day]) daysMap[day] = [];
+      daysMap[day].push(item);
+    });
+    groupedItems = Object.entries(daysMap)
+      .sort((a, b) => Number(a[0]) - Number(b[0]))
+      .map(([day, items]) => ({ day, items }));
+  }
+
+  const DayCard = ({ day, index, items }) => {
+    // If items are provided (from saved itinerary), render them as activities
+    if (items) {
+      return (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-blue-600">
+              Day {day || index + 1}
+            </h3>
+          </div>
+          <div className="mb-6">
+            <h4 className="text-lg font-semibold mb-3 flex items-center">
+              <MapPin className="w-5 h-5 mr-2" />
+              Activities
+            </h4>
+            <div className="space-y-4">
+              {items.map((activity, idx) => (
+                <div key={activity.id || idx} className="border-l-4 border-blue-500 pl-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h5 className="font-semibold text-gray-800">
+                      {activity.title || activity.activity || activity.name || `Activity ${idx + 1}`}
+                    </h5>
+                    {activity.start_time && (
+                      <div className="flex items-center text-sm text-gray-600">
+                        <Clock className="w-4 h-4 mr-1" />
+                        {activity.start_time}
+                      </div>
+                    )}
+                  </div>
+                  {activity.description && (
+                    <p className="text-gray-600 mb-2">{activity.description}</p>
+                  )}
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                    {activity.location && <span>📍 {activity.location}</span>}
+                    {activity.duration && <span>⏱️ {activity.duration}</span>}
+                    {activity.estimated_cost && <span>💰 {activity.estimated_cost}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
     if (!day) return null;
 
     return (
@@ -177,13 +234,30 @@ const ItineraryDisplay = ({ itinerary, onNavigate }) => {
         </div>
       </div>
 
-      {/* Daily Itinerary */}
+      {/* Daily Itinerary (AI generated) */}
       {itinerary.daily_itinerary && itinerary.daily_itinerary.length > 0 && (
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-6">Day-by-Day Itinerary</h2>
           {itinerary.daily_itinerary.map((day, index) => (
             <DayCard key={day.day || index} day={day} index={index} />
           ))}
+        </div>
+      )}
+
+      {/* Daily Itinerary (Saved items) */}
+      {groupedItems.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-6">Day-by-Day Itinerary</h2>
+          {groupedItems.map(({ day, items }, index) => (
+            <DayCard key={day} day={day} index={index} items={items} />
+          ))}
+        </div>
+      )}
+
+      {/* If no itinerary details available */}
+      {(!itinerary.daily_itinerary || itinerary.daily_itinerary.length === 0) && groupedItems.length === 0 && (
+        <div className="text-center text-gray-500 my-12">
+          <p>No detailed itinerary available for this trip.</p>
         </div>
       )}
 

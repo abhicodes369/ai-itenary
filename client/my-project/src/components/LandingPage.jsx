@@ -15,11 +15,25 @@ const LandingPage = ({ onNavigate }) => {
     };
 
     try {
+      // Upsert user
       const { error } = await supabase
         .from('users')
         .upsert([userData], { onConflict: ['email'] });
 
       if (error) throw error;
+
+      // Fetch the user row to get the UUID
+      const { data, error: fetchError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', userData.email)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Save the UUID to localStorage
+      localStorage.setItem('userId', data.id);
+      console.log('Saved userId to localStorage:', data.id);
 
       login(userData);
       if (onNavigate) onNavigate('dashboard');

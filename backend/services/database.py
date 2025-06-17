@@ -13,129 +13,277 @@ class DatabaseService:
             print(f"❌ Database connection failed: {str(e)}")
             raise
     
-    def save_itinerary(self, request_data, ai_response, user_id=None):
-        """Save complete itinerary to database with enhanced data structure"""
+    def upsert_user(self, user_data):
+        """Upsert user data - insert if new, update if exists"""
         try:
-            print(f"🔄 Saving complete itinerary to database...")
+            print(f"🔄 Upserting user data...")
+            
+            # Prepare user data with required fields
+            user_record = {
+                'id': user_data.get('id'),
+                'email': user_data.get('email'),
+                'google_id': user_data.get('google_id'),
+                'created_at': user_data.get('created_at', datetime.now().isoformat())
+            }
+            
+            # Remove None values
+            user_record = {k: v for k, v in user_record.items() if v is not None}
+            
+            # Upsert user with conflict resolution on email or google_id
+            result = self.supabase.table('users').upsert(
+                user_record,
+                on_conflict='email'  # or 'google_id' depending on your unique constraint
+            ).execute()
+            
+            if result.data:
+                print(f"✅ User upserted successfully: {result.data[0]['id']}")
+                return result.data[0]
+            else:
+                print("❌ Failed to upsert user")
+                return None
+                
+        except Exception as e:
+            print(f"❌ Error upserting user: {str(e)}")
+            return None
+    
+    def upsert_itinerary(self, request_data, ai_response, user_id, itinerary_id=None):
+        """Upsert complete itinerary - update if exists, insert if new"""
+        try:
+            print(f"🔄 Upserting complete itinerary to database...")
             print(f"User ID: {user_id}")
+            print(f"Itinerary ID: {itinerary_id}")
             print(f"Destination: {request_data.get('destination')}")
+            
+            # Generate new ID if not provided
+            if not itinerary_id:
+                itinerary_id = str(uuid.uuid4())
             
             # Prepare main itinerary data
             itinerary_data = {
+                'id': itinerary_id,  # Include ID for upsert
                 'user_id': user_id,
                 'destination': request_data['destination'],
                 'start_date': request_data['start_date'],
                 'end_date': request_data['end_date'],
-                'travelers': request_data.get('travelers', 1),
-                'min_budget': float(request_data.get('min_budget', 0)) if request_data.get('min_budget') else None,
-                'max_budget': float(request_data.get('max_budget', 0)) if request_data.get('max_budget') else None,
-                'vegetarian_preference': request_data.get('vegetarian_preference', False),
-                'special_requirements': request_data.get('special_requirements', ''),
-                'ai_generated_itinerary': ai_response,  # Store complete AI response as JSONB
+                'budget': float(request_data.get('budget', 0)) if request_data.get('budget') else None,
                 'created_at': datetime.now().isoformat(),
                 'updated_at': datetime.now().isoformat()
             }
             
-            print(f"💾 Inserting main itinerary data...")
-            print(f"AI Response Keys: {list(ai_response.keys()) if isinstance(ai_response, dict) else 'Not a dict'}")
+            # Add AI-generated content as JSONB
+            if ai_response:
+                itinerary_data['title'] = ai_response.get('destination', request_data['destination'])
+                itinerary_data['description'] = ai_response.get('trip_summary', f"Trip to {request_data['destination']}")
             
-            # Save main itinerary
-            result = self.supabase.table('itineraries').insert(itinerary_data).execute()
+            print(f"[DEBUG] Itinerary data to upsert: {itinerary_data}")
+            
+            # Upsert main itinerary
+            result = self.supabase.table('itineraries').upsert(
+                itinerary_data,
+                on_conflict='id'  # Use ID as the conflict resolution field
+            ).execute()
+            
+            print(f"[DEBUG] Supabase upsert result: {getattr(result, 'data', None)}")
+            if hasattr(result, 'error') and getattr(result, 'error', None):
+                print(f"[DEBUG] Supabase upsert error: {result.error}")
             
             if not result.data:
-                print("❌ Failed to insert itinerary - no data returned")
+                print("❌ Failed to upsert itinerary - no data returned")
                 return None
                 
-            itinerary_id = result.data[0]['id']
-            print(f"✅ Main itinerary saved with ID: {itinerary_id}")
+            saved_itinerary = result.data[0]
+            print(f"✅ Main itinerary upserted with ID: {saved_itinerary['id']}")
             
-            # Save additional structured data
-            try:
-                self._save_additional_data(itinerary_id, ai_response)
-            except Exception as e:
-                print(f"⚠️ Warning: Failed to save additional data: {str(e)}")
-                # Continue even if additional data fails
+            # Upsert itinerary items (daily activities)
+            if ai_response and 'daily_itinerary' in ai_response:
+                self._upsert_itinerary_items(saved_itinerary['id'], ai_response['daily_itinerary'])
             
-            print(f"✅ Complete itinerary {itinerary_id} saved successfully!")
-            return result.data[0]
+            # Return the complete saved itinerary with AI response
+            return {
+                **saved_itinerary,
+                'ai_response': ai_response
+            }
             
         except Exception as e:
-            print(f"❌ Error saving itinerary: {str(e)}")
+            print(f"❌ Error upserting itinerary: {str(e)}")
             print(f"Request data: {request_data}")
             print(f"AI Response type: {type(ai_response)}")
             return None
     
-    def _save_additional_data(self, itinerary_id, ai_response):
-        """Save additional itinerary data to related tables"""
+    def _upsert_itinerary_items(self, itinerary_id, daily_itinerary):
+        """Upsert daily itinerary items"""
         try:
-            print(f"💾 Saving additional data for itinerary {itinerary_id}")
+            print(f"💾 Upserting itinerary items for {itinerary_id}")
             
-            # Save daily activities if available
-            daily_activities = ai_response.get('daily_itinerary', [])
-            if daily_activities and isinstance(daily_activities, list):
-                print(f"Found {len(daily_activities)} days of activities")
-                self._save_itinerary_activities(itinerary_id, daily_activities)
-            else:
-                print("No daily activities found in AI response")
-                
-            # Save accommodation suggestions
-            accommodations = ai_response.get('accommodation_suggestions', [])
-            if accommodations:
-                print(f"Found {len(accommodations)} accommodation suggestions")
-                # You can add accommodation table if needed
-                
-            # Save transportation info
-            transportation = ai_response.get('transportation', {})
-            if transportation:
-                print("Found transportation information")
-                # You can add transportation table if needed
-                
-        except Exception as e:
-            print(f"⚠️ Additional data save error: {str(e)}")
-    
-    def _save_itinerary_activities(self, itinerary_id, daily_activities):
-        """Save daily activities to itinerary_activities table"""
-        try:
-            activities_to_insert = []
+            # First, delete existing items for this itinerary to avoid duplicates
+            delete_result = self.supabase.table('itinerary_items').delete().eq('itinerary_id', itinerary_id).execute()
+            print(f"🗑️ Deleted existing items: {len(delete_result.data) if delete_result.data else 0}")
             
-            for day_data in daily_activities:
+            items_to_upsert = []
+            
+            for day_data in daily_itinerary:
                 if not isinstance(day_data, dict):
                     continue
                     
                 day_number = day_data.get('day', 1)
                 activities = day_data.get('activities', [])
+                meals = day_data.get('meals', [])
                 
-                print(f"Processing day {day_number} with {len(activities)} activities")
+                print(f"Processing day {day_number}: {len(activities)} activities, {len(meals)} meals")
                 
-                if isinstance(activities, list):
-                    for activity in activities:
-                        if isinstance(activity, dict):
-                            activity_data = {
-                                'itinerary_id': itinerary_id,
-                                'day_number': day_number,
-                                'activity_type': activity.get('type', 'sightseeing'),
-                                'title': activity.get('activity', activity.get('title', 'Activity')),
-                                'description': activity.get('description', ''),
-                                'location': activity.get('location', ''),
-                                'estimated_cost': self._extract_cost(activity.get('estimated_cost')),
-                                'start_time': self._extract_time(activity.get('time')),
-                                'end_time': None,
-                                'created_at': datetime.now().isoformat()
-                            }
-                            activities_to_insert.append(activity_data)
+                # Process activities
+                for idx, activity in enumerate(activities):
+                    if isinstance(activity, dict):
+                        item_data = {
+                            'id': str(uuid.uuid4()),  # Generate unique ID for each item
+                            'itinerary_id': itinerary_id,
+                            'day_number': day_number,
+                            'activity_type': activity.get('type', 'activity'),
+                            'title': activity.get('activity', activity.get('title', 'Activity')),
+                            'description': activity.get('description', ''),
+                            'location': activity.get('location', ''),
+                            'start_time': self._extract_time(activity.get('time')),
+                            'end_time': None,  # Could be calculated from duration
+                            'cost': self._extract_cost(activity.get('estimated_cost')),
+                            'notes': json.dumps(activity.get('tips', [])) if activity.get('tips') else None,
+                            'created_at': datetime.now().isoformat()
+                        }
+                        items_to_upsert.append(item_data)
+                
+                # Process meals
+                for idx, meal in enumerate(meals):
+                    if isinstance(meal, dict):
+                        item_data = {
+                            'id': str(uuid.uuid4()),
+                            'itinerary_id': itinerary_id,
+                            'day_number': day_number,
+                            'activity_type': 'meal',
+                            'title': f"{meal.get('meal_type', 'Meal').title()} at {meal.get('restaurant', 'Restaurant')}",
+                            'description': f"{meal.get('cuisine', '')} cuisine",
+                            'location': meal.get('location', ''),
+                            'start_time': self._extract_time(meal.get('time')),
+                            'end_time': None,
+                            'cost': self._extract_cost(meal.get('estimated_cost')),
+                            'notes': json.dumps(meal.get('specialties', [])) if meal.get('specialties') else None,
+                            'created_at': datetime.now().isoformat()
+                        }
+                        items_to_upsert.append(item_data)
             
-            if activities_to_insert:
-                print(f"💾 Inserting {len(activities_to_insert)} activities...")
-                result = self.supabase.table('itinerary_activities').insert(activities_to_insert).execute()
+            if items_to_upsert:
+                print(f"💾 Upserting {len(items_to_upsert)} itinerary items...")
+                
+                # Insert new items (we deleted existing ones above)
+                result = self.supabase.table('itinerary_items').insert(items_to_upsert).execute()
+                
                 if result.data:
-                    print(f"✅ {len(result.data)} activities saved successfully")
+                    print(f"✅ {len(result.data)} itinerary items upserted successfully")
                 else:
-                    print("⚠️ No activities data returned from insert")
+                    print("⚠️ No items data returned from upsert")
             else:
-                print("⚠️ No activities to insert")
+                print("⚠️ No items to upsert")
                     
         except Exception as e:
-            print(f"❌ Error saving activities: {str(e)}")
+            print(f"❌ Error upserting itinerary items: {str(e)}")
+    
+    def save_itinerary(self, request_data, ai_response, user_id=None):
+        """Legacy method - now uses upsert internally"""
+        return self.upsert_itinerary(request_data, ai_response, user_id)
+    
+    def get_user_itineraries(self, user_id):
+        """Get all itineraries for a user with complete data"""
+        try:
+            print(f"🔍 Fetching complete itineraries for user: {user_id}")
+            
+            result = self.supabase.table('itineraries')\
+                .select('*')\
+                .eq('user_id', user_id)\
+                .order('created_at', desc=True)\
+                .execute()
+            
+            print(f"✅ Found {len(result.data)} itineraries")
+            
+            # Enhance each itinerary with items
+            for itinerary in result.data:
+                try:
+                    items_result = self.supabase.table('itinerary_items')\
+                        .select('*')\
+                        .eq('itinerary_id', itinerary['id'])\
+                        .order('day_number', desc=False)\
+                        .order('start_time', desc=False)\
+                        .execute()
+                    
+                    if items_result.data:
+                        itinerary['items'] = items_result.data
+                        print(f"Added {len(items_result.data)} items to itinerary {itinerary['id']}")
+                except Exception as e:
+                    print(f"⚠️ Could not fetch items for itinerary {itinerary['id']}: {str(e)}")
+            
+            return result.data
+            
+        except Exception as e:
+            print(f"❌ Error fetching user itineraries: {str(e)}")
+            return []
+    
+    def get_itinerary_by_id(self, itinerary_id):
+        """Get specific itinerary by ID with all related data"""
+        try:
+            print(f"🔍 Fetching complete itinerary: {itinerary_id}")
+            
+            # Get main itinerary
+            result = self.supabase.table('itineraries')\
+                .select('*')\
+                .eq('id', itinerary_id)\
+                .execute()
+            
+            if not result.data:
+                return None
+                
+            itinerary = result.data[0]
+            
+            # Get related items
+            try:
+                items_result = self.supabase.table('itinerary_items')\
+                    .select('*')\
+                    .eq('itinerary_id', itinerary_id)\
+                    .order('day_number', desc=False)\
+                    .order('start_time', desc=False)\
+                    .execute()
+                
+                if items_result.data:
+                    itinerary['items'] = items_result.data
+                    print(f"✅ Found {len(items_result.data)} related items")
+            except Exception as e:
+                print(f"⚠️ Could not fetch related items: {str(e)}")
+            
+            print(f"✅ Complete itinerary fetched successfully")
+            return itinerary
+            
+        except Exception as e:
+            print(f"❌ Error fetching itinerary: {str(e)}")
+            return None
+    
+    def delete_itinerary(self, itinerary_id):
+        """Delete itinerary and all related items"""
+        try:
+            print(f"🗑️ Deleting itinerary and related data: {itinerary_id}")
+            
+            # Delete related items first
+            items_result = self.supabase.table('itinerary_items').delete().eq('itinerary_id', itinerary_id).execute()
+            print(f"🗑️ Deleted {len(items_result.data) if items_result.data else 0} related items")
+            
+            # Delete main itinerary
+            result = self.supabase.table('itineraries').delete().eq('id', itinerary_id).execute()
+            
+            if result.data:
+                print(f"✅ Itinerary {itinerary_id} deleted successfully")
+                return True
+            else:
+                print(f"⚠️ No itinerary found with ID {itinerary_id}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Error deleting itinerary: {str(e)}")
+            return False
     
     def _extract_cost(self, cost_string):
         """Extract numeric cost from string like '₹200-400' or '₹300'"""
@@ -175,77 +323,6 @@ class DatabaseService:
             pass
         return None
     
-    def get_user_itineraries(self, user_id):
-        """Get all itineraries for a user with complete data"""
-        try:
-            print(f"🔍 Fetching complete itineraries for user: {user_id}")
-            
-            result = self.supabase.table('itineraries')\
-                .select('*')\
-                .eq('user_id', user_id)\
-                .order('created_at', desc=True)\
-                .execute()
-            
-            print(f"✅ Found {len(result.data)} itineraries")
-            
-            # Enhance each itinerary with activities
-            for itinerary in result.data:
-                try:
-                    activities_result = self.supabase.table('itinerary_activities')\
-                        .select('*')\
-                        .eq('itinerary_id', itinerary['id'])\
-                        .order('day_number', desc=False)\
-                        .execute()
-                    
-                    if activities_result.data:
-                        itinerary['structured_activities'] = activities_result.data
-                        print(f"Added {len(activities_result.data)} activities to itinerary {itinerary['id']}")
-                except Exception as e:
-                    print(f"⚠️ Could not fetch activities for itinerary {itinerary['id']}: {str(e)}")
-            
-            return result.data
-            
-        except Exception as e:
-            print(f"❌ Error fetching user itineraries: {str(e)}")
-            return []
-    
-    def get_itinerary_by_id(self, itinerary_id):
-        """Get specific itinerary by ID with all related data"""
-        try:
-            print(f"🔍 Fetching complete itinerary: {itinerary_id}")
-            
-            # Get main itinerary
-            result = self.supabase.table('itineraries')\
-                .select('*')\
-                .eq('id', itinerary_id)\
-                .execute()
-            
-            if not result.data:
-                return None
-                
-            itinerary = result.data[0]
-            
-            # Get related activities
-            try:
-                activities_result = self.supabase.table('itinerary_activities')\
-                    .select('*')\
-                    .eq('itinerary_id', itinerary_id)\
-                    .order('day_number', desc=False)\
-                    .execute()
-                
-                if activities_result.data:
-                    itinerary['structured_activities'] = activities_result.data
-                    print(f"✅ Found {len(activities_result.data)} related activities")
-            except Exception as e:
-                print(f"⚠️ Could not fetch related activities: {str(e)}")
-            
-            print(f"✅ Complete itinerary fetched successfully")
-            return itinerary
-            
-        except Exception as e:
-            print(f"❌ Error fetching itinerary: {str(e)}")
-            return None
-    
     def test_connection(self):
         """Test database connection and table access"""
         try:
@@ -259,9 +336,9 @@ class DatabaseService:
             itineraries_result = self.supabase.table('itineraries').select('id').limit(1).execute()
             print(f"✅ Itineraries table accessible: {len(itineraries_result.data)} records found")
             
-            # Test activities table
-            activities_result = self.supabase.table('itinerary_activities').select('id').limit(1).execute()
-            print(f"✅ Activities table accessible: {len(activities_result.data)} records found")
+            # Test itinerary_items table
+            items_result = self.supabase.table('itinerary_items').select('id').limit(1).execute()
+            print(f"✅ Itinerary items table accessible: {len(items_result.data)} records found")
             
             print("✅ Database connection test successful")
             return True

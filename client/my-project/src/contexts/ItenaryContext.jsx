@@ -1,5 +1,5 @@
 // ItineraryContext.jsx - Updated with database operations
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import ApiService from '../services/api';
 import { useAuth } from './AuthContext';
 
@@ -20,14 +20,7 @@ export const ItineraryProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const { user } = useAuth();
 
-  // Load user itineraries on mount or user change
-  useEffect(() => {
-    if (user?.sub) {
-      loadUserItineraries();
-    }
-  }, [user]);
-
-  const loadUserItineraries = async () => {
+  const loadUserItineraries = useCallback(async () => {
     try {
       setLoading(true);
       const userId = user?.sub || ApiService.getUserId();
@@ -40,7 +33,14 @@ export const ItineraryProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.sub]);
+
+  // Load user itineraries only once when the component mounts
+  useEffect(() => {
+    if (user?.sub) {
+      loadUserItineraries();
+    }
+  }, []); // Empty dependency array means this runs once on mount
 
   const generateItinerary = async (formData) => {
     setLoading(true);
@@ -135,9 +135,9 @@ export const ItineraryProvider = ({ children }) => {
     setError(null);
   };
 
-  const refreshItineraries = () => {
+  const refreshItineraries = useCallback(() => {
     loadUserItineraries();
-  };
+  }, [loadUserItineraries]);
 
   const value = {
     currentItinerary,

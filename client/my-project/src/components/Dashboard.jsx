@@ -19,7 +19,7 @@ const Dashboard = ({ onNavigate }) => {
     if (user) {
       refreshItineraries();
     }
-  }, [user, refreshItineraries]);
+  }, []); // Empty dependency array means this runs once on mount
 
   const handleCreateItinerary = () => {
     if (onNavigate) {
@@ -150,7 +150,7 @@ const Dashboard = ({ onNavigate }) => {
           </div>
         )}
 
-        {/* Stats Cards */}
+        
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
@@ -174,17 +174,7 @@ const Dashboard = ({ onNavigate }) => {
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Budget</p>
-                <p className="text-3xl font-bold text-gray-900">₹{stats.totalBudget.toLocaleString()}</p>
-              </div>
-              <div className="p-3 bg-purple-50 rounded-full">
-                <Users className="h-6 w-6 text-purple-500" />
-              </div>
-            </div>
-          </div>
+          
         </div>
 
         {/* Create New Trip */}

@@ -5,6 +5,7 @@ from services.aiservice import AIService
 from services.database import DatabaseService
 import traceback
 import uuid
+import re
 
 app = Flask(__name__)
 CORS(app)
@@ -94,46 +95,50 @@ def generate_itinerary():
         
         print("✅ AI Itinerary generated successfully!")
         
+        # Get user_id (generate one if not provided for testing)
+        user_id = data.get('user_id') or request.headers.get('X-User-ID')
+        
+        # Backend check: user_id must be present and a valid UUID
+        uuid_regex = re.compile(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
+        if not user_id or not uuid_regex.match(str(user_id)):
+            print(f"❌ Invalid or missing user_id: {user_id}")
+            return jsonify({'error': 'Invalid or missing user_id. Please log in or register.'}), 400
+        
+        print("💾 UPSERTING TO DATABASE...")
+        
         # Prepare database request data
         db_request_data = {
             'destination': request_data['destination'],
             'start_date': request_data['start_date'],
             'end_date': request_data['end_date'],
-            'travelers': data.get('travelers', 1),
-            'min_budget': budget,
-            'max_budget': budget,
-            'vegetarian_preference': request_data['isVegetarian'],
-            'special_requirements': data.get('special_requirements', '')
+            'budget': budget
         }
         
-        # Get user_id (generate one if not provided for testing)
-        user_id = data.get('user_id') or request.headers.get('X-User-ID')
-        if not user_id:
-            # Generate a test user ID for demonstration
-            user_id = str(uuid.uuid4())  # Generate a proper UUID
-            print(f"🔧 Generated test user ID: {user_id}")
+        print(f"[DEBUG] Calling upsert_itinerary with: db_request_data={db_request_data}, ai_response keys={list(ai_response.keys())}, user_id={user_id}")
         
-        print("💾 SAVING TO DATABASE...")
+        # Upsert to database
+        itinerary_id = data.get('itinerary_id')  # For updates
+        saved_itinerary = db_service.upsert_itinerary(db_request_data, ai_response, user_id, itinerary_id)
         
-        # Save to database
-        saved_itinerary = db_service.save_itinerary(db_request_data, ai_response, user_id)
+        print(f"[DEBUG] upsert_itinerary returned: {saved_itinerary}")
         
         if saved_itinerary:
-            print(f"🎉 SUCCESS! Itinerary saved to database with ID: {saved_itinerary.get('id')}")
+            print(f"🎉 SUCCESS! Itinerary upserted to database with ID: {saved_itinerary.get('id')}")
             
             # Combine AI response with database info
             response_data = {
                 'id': saved_itinerary['id'],
                 'user_id': saved_itinerary.get('user_id'),
                 'created_at': saved_itinerary.get('created_at'),
+                'updated_at': saved_itinerary.get('updated_at'),
                 'database_saved': True,
-                **ai_response  # Include all AI-generated content
+                **saved_itinerary.get('ai_response', ai_response)  # Include all AI-generated content
             }
             
-            print("✅ COMPLETE SUCCESS - Data saved to database!")
+            print("✅ COMPLETE SUCCESS - Data upserted to database!")
             
         else:
-            print("⚠️ Database save failed, returning AI response only")
+            print("⚠️ Database upsert failed, returning AI response only")
             response_data = {
                 **ai_response,
                 'database_saved': False,
@@ -144,7 +149,7 @@ def generate_itinerary():
         
         return jsonify({
             'success': True,
-            'message': 'Itinerary generated successfully',
+            'message': 'Itinerary generated and saved successfully',
             'data': response_data
         }), 200
         
@@ -156,6 +161,77 @@ def generate_itinerary():
             'error': 'Internal server error occurred while generating itinerary',
             'details': str(e)
         }), 500
+
+@app.route('/api/upsert-user', methods=['POST'])
+def upsert_user():
+    """Upsert user data endpoint"""
+    try:
+        print("\n👤 UPSERTING USER DATA...")
+        
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        user = db_service.upsert_user(data)
+        
+        if user:
+            print(f"✅ User upserted successfully: {user['id']}")
+            return jsonify({
+                'success': True,
+                'message': 'User upserted successfully',
+                'data': user
+            }), 200
+        else:
+            print("❌ Failed to upsert user")
+            return jsonify({'error': 'Failed to upsert user'}), 500
+            
+    except Exception as e:
+        print(f"❌ Error upserting user: {str(e)}")
+        return jsonify({'error': 'Failed to upsert user'}), 500
+
+@app.route('/api/itineraries/<itinerary_id>', methods=['PUT'])
+def update_itinerary(itinerary_id):
+    """Update existing itinerary"""
+    try:
+        print(f"\n📝 UPDATING ITINERARY: {itinerary_id}")
+        
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        # Get user_id
+        user_id = data.get('user_id') or request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({'error': 'User ID required'}), 400
+        
+        # Prepare request data
+        request_data = {
+            'destination': data.get('destination', ''),
+            'start_date': data.get('start_date', ''),
+            'end_date': data.get('end_date', ''),
+            'budget': data.get('budget', 0)
+        }
+        
+        # Get AI response (could be regenerated or passed from frontend)
+        ai_response = data.get('ai_response', {})
+        
+        # Upsert with specific ID
+        saved_itinerary = db_service.upsert_itinerary(request_data, ai_response, user_id, itinerary_id)
+        
+        if saved_itinerary:
+            print("✅ Itinerary updated successfully")
+            return jsonify({
+                'success': True,
+                'message': 'Itinerary updated successfully',
+                'data': saved_itinerary
+            }), 200
+        else:
+            print("❌ Failed to update itinerary")
+            return jsonify({'error': 'Failed to update itinerary'}), 500
+            
+    except Exception as e:
+        print(f"❌ Error updating itinerary: {str(e)}")
+        return jsonify({'error': 'Failed to update itinerary'}), 500
 
 @app.route('/api/itineraries', methods=['GET'])
 def get_user_itineraries():

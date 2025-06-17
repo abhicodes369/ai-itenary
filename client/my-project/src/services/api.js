@@ -4,6 +4,10 @@ const API_BASE_URL = 'http://localhost:5000/api';
 class ApiService {
   static async generateItinerary(data) {
     try {
+      const userId = this.getUserId();
+      if (!userId) {
+        throw new Error('No valid user ID found. Please log in or register.');
+      }
       console.log('API: Sending request to generate itinerary:', data);
       
       const response = await fetch(`${API_BASE_URL}/generate-itinerary`, {
@@ -11,7 +15,7 @@ class ApiService {
         headers: {
           'Content-Type': 'application/json',
           // Add user ID header if available
-          'X-User-ID': this.getUserId() || 'anonymous'
+          'X-User-ID': userId
         },
         body: JSON.stringify(data),
       });
@@ -105,7 +109,7 @@ class ApiService {
   static getUserId() {
     // This should get the user ID from your authentication system
     // For now, return a default or from localStorage
-    return localStorage.getItem('userId') || 'user_123';
+    return localStorage.getItem('userId') || null;
   }
 
   static async healthCheck() {
