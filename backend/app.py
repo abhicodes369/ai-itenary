@@ -12,9 +12,9 @@ CORS(app, resources={
     r"/api/*": {
         "origins": [
             "http://localhost:5173",  # Vite default dev server
-            "http://localhost:3000",  # Alternative dev port
+            "http://localhost:3000",  # Alternative dev 
             "https://*.netlify.app",  # Netlify deployments
-            "https://ai-itinerary.netlify.app"  # Your specific Netlify domain
+            "https://aiitenary.netlify.app"  
         ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "X-User-ID"]
