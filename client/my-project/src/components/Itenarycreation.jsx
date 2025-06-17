@@ -81,19 +81,19 @@ const ItineraryCreation = ({ onNavigate }) => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-6 text-center">Create Your Dream Itinerary</h2>
+    <div className="max-w-2xl mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-lg">
+      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center">Create Your Dream Itinerary</h2>
       
       {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm sm:text-base">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Destination */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
             Where do you want to go? *
           </label>
           <input
@@ -101,14 +101,14 @@ const ItineraryCreation = ({ onNavigate }) => {
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
             placeholder="Enter destination (e.g., Goa, Kerala, Rajasthan)"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
 
         {/* Start Date */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
             Start Date *
           </label>
           <input
@@ -116,14 +116,14 @@ const ItineraryCreation = ({ onNavigate }) => {
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             min={new Date().toISOString().split('T')[0]}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
 
         {/* Duration */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
             Duration (days) *
           </label>
           <input
@@ -133,14 +133,14 @@ const ItineraryCreation = ({ onNavigate }) => {
             placeholder="Number of days"
             min="1"
             max="30"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
 
         {/* Budget */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
             Total Budget (₹) *
           </label>
           <input
@@ -149,7 +149,7 @@ const ItineraryCreation = ({ onNavigate }) => {
             onChange={(e) => setBudget(e.target.value)}
             placeholder="Total budget in rupees"
             min="1000"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
@@ -172,7 +172,7 @@ const ItineraryCreation = ({ onNavigate }) => {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-3 px-4 rounded-md text-white font-medium ${
+          className={`w-full py-2 sm:py-3 px-4 rounded-md text-white font-medium text-sm sm:text-base ${
             loading 
               ? 'bg-gray-400 cursor-not-allowed' 
               : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500'
@@ -185,7 +185,7 @@ const ItineraryCreation = ({ onNavigate }) => {
       {/* Show calculated end date if both start date and duration are provided */}
       {startDate && duration && (
         <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
-          <p className="text-sm text-blue-700">
+          <p className="text-xs sm:text-sm text-blue-700">
             <strong>Trip Duration:</strong> {startDate} to {calculateEndDate(startDate, duration)} 
             ({duration} days)
           </p>

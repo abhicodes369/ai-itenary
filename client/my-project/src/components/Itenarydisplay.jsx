@@ -7,13 +7,13 @@ const ItineraryDisplay = ({ itinerary, onNavigate }) => {
 
   if (!itinerary) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="text-center py-12">
-          <AlertCircle className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500 text-lg">No itinerary to display</p>
+      <div className="max-w-4xl mx-auto p-4 sm:p-6">
+        <div className="text-center py-8 sm:py-12">
+          <AlertCircle className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-4" />
+          <p className="text-base sm:text-lg text-gray-500">No itinerary to display</p>
           <button 
             onClick={() => onNavigate && onNavigate('dashboard')}
-            className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="mt-4 bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
           >
             Back to Dashboard
           </button>
@@ -40,35 +40,35 @@ const ItineraryDisplay = ({ itinerary, onNavigate }) => {
     // If items are provided (from saved itinerary), render them as activities
     if (items) {
       return (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-blue-600">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-lg sm:text-xl font-bold text-blue-600">
               Day {day || index + 1}
             </h3>
           </div>
-          <div className="mb-6">
-            <h4 className="text-lg font-semibold mb-3 flex items-center">
-              <MapPin className="w-5 h-5 mr-2" />
+          <div className="mb-4 sm:mb-6">
+            <h4 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 flex items-center">
+              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Activities
             </h4>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {items.map((activity, idx) => (
-                <div key={activity.id || idx} className="border-l-4 border-blue-500 pl-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h5 className="font-semibold text-gray-800">
+                <div key={activity.id || idx} className="border-l-4 border-blue-500 pl-3 sm:pl-4">
+                  <div className="flex items-center justify-between mb-1 sm:mb-2">
+                    <h5 className="font-semibold text-gray-800 text-sm sm:text-base">
                       {activity.title || activity.activity || activity.name || `Activity ${idx + 1}`}
                     </h5>
                     {activity.start_time && (
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Clock className="w-4 h-4 mr-1" />
+                      <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                        <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                         {activity.start_time}
                       </div>
                     )}
                   </div>
                   {activity.description && (
-                    <p className="text-gray-600 mb-2">{activity.description}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">{activity.description}</p>
                   )}
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                  <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
                     {activity.location && <span>📍 {activity.location}</span>}
                     {activity.duration && <span>⏱️ {activity.duration}</span>}
                     {activity.estimated_cost && <span>💰 {activity.estimated_cost}</span>}
@@ -83,54 +83,54 @@ const ItineraryDisplay = ({ itinerary, onNavigate }) => {
     if (!day) return null;
 
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-blue-600">
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <h3 className="text-lg sm:text-xl font-bold text-blue-600">
             Day {day.day || index + 1}
           </h3>
           {day.date && (
-            <div className="flex items-center text-gray-600">
-              <Calendar className="w-4 h-4 mr-1" />
+            <div className="flex items-center text-xs sm:text-sm text-gray-600">
+              <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
               <span>{day.date} {day.day_name && `(${day.day_name})`}</span>
             </div>
           )}
         </div>
         
         {day.theme && (
-          <p className="text-gray-700 mb-4 italic">{day.theme}</p>
+          <p className="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4 italic">{day.theme}</p>
         )}
 
         {/* Activities */}
         {day.activities && day.activities.length > 0 && (
-          <div className="mb-6">
-            <h4 className="text-lg font-semibold mb-3 flex items-center">
-              <MapPin className="w-5 h-5 mr-2" />
+          <div className="mb-4 sm:mb-6">
+            <h4 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 flex items-center">
+              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Activities
             </h4>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {day.activities.map((activity, idx) => (
-                <div key={idx} className="border-l-4 border-blue-500 pl-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h5 className="font-semibold text-gray-800">
+                <div key={idx} className="border-l-4 border-blue-500 pl-3 sm:pl-4">
+                  <div className="flex items-center justify-between mb-1 sm:mb-2">
+                    <h5 className="font-semibold text-gray-800 text-sm sm:text-base">
                       {activity.activity || activity.name || `Activity ${idx + 1}`}
                     </h5>
                     {activity.time && (
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Clock className="w-4 h-4 mr-1" />
+                      <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                        <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                         {activity.time}
                       </div>
                     )}
                   </div>
                   {activity.description && (
-                    <p className="text-gray-600 mb-2">{activity.description}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">{activity.description}</p>
                   )}
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                  <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
                     {activity.location && <span>📍 {activity.location}</span>}
                     {activity.duration && <span>⏱️ {activity.duration}</span>}
                     {activity.estimated_cost && <span>💰 {activity.estimated_cost}</span>}
                   </div>
                   {activity.highlights && Array.isArray(activity.highlights) && (
-                    <div className="mt-2">
+                    <div className="mt-1 sm:mt-2">
                       <span className="text-xs font-semibold text-blue-600">Highlights: </span>
                       <span className="text-xs text-gray-600">{activity.highlights.join(', ')}</span>
                     </div>
@@ -143,24 +143,24 @@ const ItineraryDisplay = ({ itinerary, onNavigate }) => {
 
         {/* Meals */}
         {day.meals && day.meals.length > 0 && (
-          <div className="mb-4">
-            <h4 className="text-lg font-semibold mb-3 flex items-center">
-              <Utensils className="w-5 h-5 mr-2" />
+          <div className="mb-3 sm:mb-4">
+            <h4 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 flex items-center">
+              <Utensils className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Meals
             </h4>
-            <div className="grid gap-3">
+            <div className="grid gap-2 sm:gap-3">
               {day.meals.map((meal, idx) => (
-                <div key={idx} className="bg-gray-50 rounded-lg p-3">
+                <div key={idx} className="bg-gray-50 rounded-lg p-2 sm:p-3">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium capitalize">
+                    <span className="font-medium capitalize text-sm sm:text-base">
                       {meal.meal_type || meal.type || `Meal ${idx + 1}`}
                     </span>
                     {meal.time && (
-                      <span className="text-sm text-gray-600">{meal.time}</span>
+                      <span className="text-xs sm:text-sm text-gray-600">{meal.time}</span>
                     )}
                   </div>
                   {meal.restaurant && (
-                    <p className="text-sm font-semibold text-gray-800">{meal.restaurant}</p>
+                    <p className="text-xs sm:text-sm font-semibold text-gray-800">{meal.restaurant}</p>
                   )}
                   <div className="flex items-center justify-between text-xs text-gray-600">
                     {meal.cuisine && <span>{meal.cuisine}</span>}
@@ -177,9 +177,9 @@ const ItineraryDisplay = ({ itinerary, onNavigate }) => {
 
         {/* Daily Budget */}
         {day.daily_budget_breakdown && (
-          <div className="bg-blue-50 rounded-lg p-3">
-            <h5 className="font-semibold text-blue-800 mb-2">Daily Budget Breakdown</h5>
-            <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="bg-blue-50 rounded-lg p-2 sm:p-3">
+            <h5 className="font-semibold text-blue-800 mb-1 sm:mb-2 text-sm sm:text-base">Daily Budget Breakdown</h5>
+            <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
               {Object.entries(day.daily_budget_breakdown).map(([category, amount]) => (
                 <div key={category} className="flex justify-between">
                   <span className="capitalize text-gray-700">{category.replace('_', ' ')}:</span>
@@ -194,40 +194,40 @@ const ItineraryDisplay = ({ itinerary, onNavigate }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6">
       {/* Back Button */}
       <button
         onClick={() => onNavigate && onNavigate('dashboard')}
-        className="mb-6 flex items-center text-blue-600 hover:text-blue-700 transition-colors"
+        className="mb-4 sm:mb-6 flex items-center text-blue-600 hover:text-blue-700 transition-colors text-sm sm:text-base"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to Dashboard
       </button>
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-6 mb-6">
-        <h1 className="text-3xl font-bold mb-2">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">
           {itinerary.destination || 'Your Trip'} Itinerary
         </h1>
         {itinerary.trip_summary && (
-          <p className="text-blue-100 mb-4">{itinerary.trip_summary}</p>
+          <p className="text-sm sm:text-base text-blue-100 mb-3 sm:mb-4">{itinerary.trip_summary}</p>
         )}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           {itinerary.duration && (
-            <div className="flex items-center">
-              <Calendar className="w-5 h-5 mr-2" />
+            <div className="flex items-center text-sm sm:text-base">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               <span>{itinerary.duration}</span>
             </div>
           )}
           {itinerary.total_estimated_cost && (
-            <div className="flex items-center">
-              <DollarSign className="w-5 h-5 mr-2" />
+            <div className="flex items-center text-sm sm:text-base">
+              <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               <span>{itinerary.total_estimated_cost}</span>
             </div>
           )}
           {itinerary.destination && (
-            <div className="flex items-center">
-              <MapPin className="w-5 h-5 mr-2" />
+            <div className="flex items-center text-sm sm:text-base">
+              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               <span>{itinerary.destination}</span>
             </div>
           )}
@@ -236,8 +236,8 @@ const ItineraryDisplay = ({ itinerary, onNavigate }) => {
 
       {/* Daily Itinerary (AI generated) */}
       {itinerary.daily_itinerary && itinerary.daily_itinerary.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-6">Day-by-Day Itinerary</h2>
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Day-by-Day Itinerary</h2>
           {itinerary.daily_itinerary.map((day, index) => (
             <DayCard key={day.day || index} day={day} index={index} />
           ))}
@@ -246,10 +246,10 @@ const ItineraryDisplay = ({ itinerary, onNavigate }) => {
 
       {/* Daily Itinerary (Saved items) */}
       {groupedItems.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-6">Day-by-Day Itinerary</h2>
-          {groupedItems.map(({ day, items }, index) => (
-            <DayCard key={day} day={day} index={index} items={items} />
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Day-by-Day Itinerary</h2>
+          {groupedItems.map(({ day, items }) => (
+            <DayCard key={day} day={day} items={items} />
           ))}
         </div>
       )}

@@ -100,24 +100,24 @@ const Dashboard = ({ onNavigate }) => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
-              <MapPin className="h-8 w-8 text-blue-500" />
-              <span className="text-2xl font-bold text-gray-900">TravelPlan</span>
+              <MapPin className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />
+              <span className="text-xl sm:text-2xl font-bold text-gray-900">TravelPlan</span>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               {user?.picture && (
                 <img 
                   src={user.picture} 
                   alt={user?.name || 'User'}
-                  className="w-10 h-10 rounded-full"
+                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full"
                   onError={(e) => {
                     e.target.style.display = 'none';
                   }}
                 />
               )}
-              <div className="hidden md:block">
+              <div className="hidden sm:block">
                 <p className="text-sm font-medium text-gray-900">{user?.name || 'User'}</p>
                 <p className="text-xs text-gray-500">{user?.email || ''}</p>
               </div>
@@ -132,62 +132,61 @@ const Dashboard = ({ onNavigate }) => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
             Welcome back, {user?.name?.split(' ')[0] || 'there'}! 👋
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             Ready to plan your next adventure? Let's make it unforgettable.
           </p>
         </div>
 
         {/* Error Display */}
         {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div className="mb-6 p-3 sm:p-4 bg-red-100 border border-red-400 text-red-700 rounded text-sm sm:text-base">
             {error}
           </div>
         )}
 
-        
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Trips</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalTrips}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.totalTrips}</p>
               </div>
-              <div className="p-3 bg-blue-50 rounded-full">
-                <MapPin className="h-6 w-6 text-blue-500" />
+              <div className="p-2 sm:p-3 bg-blue-50 rounded-full">
+                <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Upcoming</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.upcomingTrips}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.upcomingTrips}</p>
               </div>
-              <div className="p-3 bg-green-50 rounded-full">
-                <Calendar className="h-6 w-6 text-green-500" />
+              <div className="p-2 sm:p-3 bg-green-50 rounded-full">
+                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-green-500" />
               </div>
             </div>
           </div>
-          
         </div>
 
         {/* Create New Trip */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <button
             onClick={handleCreateItinerary}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-xl transition-all duration-200 w-full md:w-auto border-dashed hover:border-blue-500 cursor-pointer group"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-xl transition-all duration-200 w-full border-dashed hover:border-blue-500 cursor-pointer group"
           >
             <div className="flex items-center justify-center space-x-3 text-blue-500 group-hover:text-blue-600">
-              <Plus className="h-8 w-8" />
+              <Plus className="h-6 w-6 sm:h-8 sm:w-8" />
               <div className="text-left">
-                <p className="text-lg font-semibold">Create New Itinerary</p>
-                <p className="text-sm text-gray-500">Plan your next adventure</p>
+                <p className="text-base sm:text-lg font-semibold">Create New Itinerary</p>
+                <p className="text-xs sm:text-sm text-gray-500">Plan your next adventure</p>
               </div>
             </div>
           </button>
@@ -195,58 +194,58 @@ const Dashboard = ({ onNavigate }) => {
 
         {/* Recent Itineraries */}
         <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Your Itineraries</h2>
+          <div className="flex justify-between items-center mb-4 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Your Itineraries</h2>
             {loading && (
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-blue-600"></div>
             )}
           </div>
           
           {!Array.isArray(itineraries) || itineraries.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center py-12">
-              <MapPin className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 text-center py-8 sm:py-12">
+              <MapPin className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
                 No itineraries yet
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
                 Create your first travel itinerary to get started
               </p>
               <button 
                 onClick={handleCreateItinerary} 
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
               >
                 Create Itinerary
               </button>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {itineraries.map((itinerary, index) => {
                 if (!itinerary) return null;
                 
                 return (
                   <div
                     key={itinerary.id || index}
-                    className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-xl transition-all duration-200 cursor-pointer group relative"
+                    className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-xl transition-all duration-200 cursor-pointer group relative"
                     onClick={() => handleViewItinerary(itinerary)}
                   >
                     {/* Delete Button */}
                     {itinerary.id && (
                       <button
                         onClick={(e) => handleDeleteItinerary(e, itinerary.id)}
-                        className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                        className="absolute top-2 right-2 sm:top-4 sm:right-4 p-2 text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     )}
                     
                     <div className="mb-4">
-                      <div className="w-full h-32 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg mb-4 flex items-center justify-center">
-                        <MapPin className="h-12 w-12 text-white" />
+                      <div className="w-full h-24 sm:h-32 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg mb-4 flex items-center justify-center">
+                        <MapPin className="h-8 w-8 sm:h-12 sm:w-12 text-white" />
                       </div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                         {itinerary.destination || 'Unknown Destination'}
                       </h3>
-                      <div className="space-y-2 text-sm text-gray-600">
+                      <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-600">
                         {itinerary.start_date && itinerary.end_date && (
                           <div className="flex items-center space-x-2">
                             <Calendar className="h-4 w-4" />

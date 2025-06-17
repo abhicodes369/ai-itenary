@@ -33,7 +33,6 @@ const LandingPage = ({ onNavigate }) => {
 
       // Save the UUID to localStorage
       localStorage.setItem('userId', data.id);
-      console.log('Saved userId to localStorage:', data.id);
 
       login(userData);
       if (onNavigate) onNavigate('dashboard');
@@ -98,20 +97,24 @@ const LandingPage = ({ onNavigate }) => {
               </p>
 
             
-              <div className="bg-gray-800 p-8 rounded-2xl border border-gray-700 max-w-md mx-auto backdrop-blur-sm">
-                <h2 className="text-2xl font-bold mb-2">Start Planning Today</h2>
-                <p className="text-gray-400 mb-6">Join thousands of travelers who trust TravelPlan</p>
+              <div className="bg-gray-800 p-4 sm:p-8 rounded-2xl border border-gray-700 max-w-md mx-auto backdrop-blur-sm">
+                <h2 className="text-xl sm:text-2xl font-bold mb-2">Start Planning Today</h2>
+                <p className="text-sm sm:text-base text-gray-400 mb-4 sm:mb-6">Join thousands of travelers who trust TravelPlan</p>
                 
-                <div className="space-y-4 gap-x-1.5">
-                  <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
-                    onError={handleGoogleError}
-                    theme="filled_black"
-                    size="medium"
-                    width="6969"
-                    shape="pill"
-                  />
-                  <p className="text-xs text-gray-500">
+                <div className="space-y-4">
+                  <div className="w-full flex justify-center">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={handleGoogleError}
+                      theme="filled_black"
+                      size="large"
+                      width="100%"
+                      shape="pill"
+                      text="signin_with"
+                      locale="en"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 text-center">
                     Free to start • No credit card required
                   </p>
                 </div>
@@ -175,22 +178,25 @@ const LandingPage = ({ onNavigate }) => {
 
 
             {/* CTA Section */}
-            <div className="text-center bg-gradient-to-r from-blue-600 to-purple-600 p-12 rounded-2xl">
-              <h2 className="text-4xl font-bold mb-4">Ready to Start Your Journey?</h2>
-              <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            <div className="text-center bg-gradient-to-r from-blue-600 to-purple-600 p-6 sm:p-12 rounded-2xl">
+              <h2 className="text-2xl sm:text-4xl font-bold mb-4">Ready to Start Your Journey?</h2>
+              <p className="text-base sm:text-xl text-blue-100 mb-6 sm:mb-8 max-w-2xl mx-auto">
                 Join thousands of travelers who have discovered their perfect trips with TravelPlan
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <div className="bg-white p-4 rounded-xl">
+                <div className="w-full sm:w-auto bg-white p-3 sm:p-4 rounded-xl">
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
                     onError={handleGoogleError}
                     theme="outline"
                     size="large"
+                    width="100%"
+                    text="signin_with"
+                    locale="en"
                   />
                 </div>
-                <div className="flex items-center text-blue-100">
-                  <ArrowRight className="h-5 w-5 mr-2" />
+                <div className="flex items-center text-blue-100 text-sm sm:text-base">
+                  <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                   <span>Get started in 30 seconds</span>
                 </div>
               </div>
